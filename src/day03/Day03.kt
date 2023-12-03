@@ -99,21 +99,14 @@ data class Point(
      */
     fun getNeighbours(input: List<String>): List<Point> {
         val neighbours = mutableListOf<Point>()
-        val limitX = input[0].length
-        val limitY = input.size
 
-        for (i in -1..1) {
-            for (j in -1..1) {
-                if (x + i in 0..<limitX && y + j in 0..<limitY) {
-                    // don't add self
-                    if (i == 0 && j == 0) continue
+        for (xOffset in -1..1) for (yOffset in -1..1) {
+            if (x + xOffset !in input[0].indices || y + yOffset !in input.indices) continue
 
-                    val char = input[y + j][x + i]
-                    if (char.isDigit() || char == '.') continue
+            val char = input[y + yOffset][x + xOffset]
+            if (char.isDigit() || char == '.') continue
 
-                    neighbours.add(Point(x + i, y + j, char))
-                }
-            }
+            neighbours.add(Point(x + xOffset, y + yOffset, char))
         }
         return neighbours
     }
