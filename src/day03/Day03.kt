@@ -6,8 +6,8 @@ import readInput
 fun main() {
     fun part1(input: List<String>): Int {
         val parser = Parser(input)
-        val partNumbers = parser.parseNumbers().filter { it.isPartNumber(input) }
-        return partNumbers.sumOf { it.getNumber() }
+        val partNumbers = parser.parseNumbers().filter { it.isValidPartNumber(input) }
+        return partNumbers.sumOf { it.number }
     }
 
     fun part2(input: List<String>): Int {
@@ -19,7 +19,7 @@ fun main() {
             val numbersWithThisNeighbour = numbers.filter { it.hasStarNeighbour(star, input) }
 
             if (numbersWithThisNeighbour.size == 2)
-                numbersWithThisNeighbour[0].getNumber() * numbersWithThisNeighbour[1].getNumber()
+                numbersWithThisNeighbour[0].number * numbersWithThisNeighbour[1].number
             else
                 0
         }
@@ -63,9 +63,7 @@ class Parser(private val input: List<String>) {
         val stars = mutableListOf<Point>()
         input.forEachIndexed { y, line ->
             line.forEachIndexed { x, char ->
-                if (char == '*') {
-                    stars.add(Point(x, y, char))
-                }
+                if (char == '*') stars.add(Point(x, y, char))
             }
         }
 
@@ -77,11 +75,9 @@ class Parser(private val input: List<String>) {
 data class PartNumber(
     val points: List<Point>,
 ) {
-    fun getNumber(): Int {
-        return points.map { it.value }.joinToString("").toInt()
-    }
+    val number: Int = points.map { it.value }.joinToString("").toInt()
 
-    fun isPartNumber(input: List<String>): Boolean {
+    fun isValidPartNumber(input: List<String>): Boolean {
         return points.any { it.getNeighbours(input).isNotEmpty() }
     }
 
