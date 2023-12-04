@@ -39,15 +39,13 @@ fun main() {
 }
 
 class Parser(private val input: List<String>) {
-    // find all PartNumbers
     fun parseNumbers(): List<PartNumber> {
         val partNumbers = mutableListOf<PartNumber>()
         input.forEachIndexed { y, line ->
             val points = mutableListOf<Point>()
             line.forEachIndexed { x, char ->
-                if (char.isDigit()) {
-                    points.add(Point(x, y, char))
-                }
+                if (char.isDigit()) points.add(Point(x, y, char))
+
                 if ((!char.isDigit() || x == line.length - 1) && points.isNotEmpty()) {
                     partNumbers.add(PartNumber(points.toList()))
                     points.clear()
@@ -58,7 +56,6 @@ class Parser(private val input: List<String>) {
         return partNumbers
     }
 
-    // part 2 - find all stars
     fun parseStars(): List<Point> {
         val stars = mutableListOf<Point>()
         input.forEachIndexed { y, line ->
