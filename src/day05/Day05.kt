@@ -1,5 +1,6 @@
 package day05
 
+import java.lang.Exception
 import println
 import readInput
 
@@ -13,33 +14,32 @@ fun main() {
     }
 
     /**
-     * This is a shitty brute force, that took ~5min to finish xD
-     * It would be better to:
-     * 1. find the lowest location
+     * Reverse the mapping from part 1:
+     * 1. find the lowest location (doesn't really matter, i just start at 0 and go up)
      * 2. map your way backwards
      * 3. check if the result is a valid seed
      * 4. if not, use the next lowest location
      */
     fun part2(input: List<String>): Long {
         val (seeds, mappings) = parseInput(input)
-        var currentMin = Long.MAX_VALUE
+        val listOfSeedRanges = mutableListOf<Range>()
         for (i in seeds.indices step 2) {
-            val start = seeds[i]
-            val end = start + seeds[i + 1] - 1
-            val newMin = (start..end).minOf { seed ->
-                var currentVal = seed
-                for (mapping in mappings) {
-                    currentVal = mapping.mapValue(currentVal)
-                }
-                currentVal
-            }
+            listOfSeedRanges.add(Range(seeds[i], seeds[i + 1]))
+        }
 
-            if (newMin < currentMin) {
-                currentMin = newMin
+        val reversed = mappings.reversed()
+
+        for (location in 0L..<Long.MAX_VALUE) {
+            val seed = reversed.fold(location) { acc, mapping -> mapping.mapValueReversed(acc) }
+
+            for (range in listOfSeedRanges) {
+                if (range.isValueInRange(seed)) {
+                    return location
+                }
             }
         }
 
-        return currentMin
+        throw Exception("no seed found")
     }
 
     // test if implementation meets criteria from the description, like:
@@ -50,7 +50,7 @@ fun main() {
     val input = readInput("day05/Day05")
 
     part1(input).println()
-    part2(input).println()
+    part2(input).println() // 125742456
 }
 
 fun parseInput(input: List<String>): Pair<List<Long>, List<Mapping>> {
@@ -61,6 +61,15 @@ fun parseInput(input: List<String>): Pair<List<Long>, List<Mapping>> {
     var name = ""
     for (i in 2 until input.size) {
         val line = input[i]
+
+        if (i == input.size - 1) {
+            // end
+            val (dest, source, length) = line.split(" ").map { it.toLong() }
+            sourceRanges.add(Range(source, length))
+            destRanges.add(Range(dest, length))
+            mappings.add(Mapping(name, sourceRanges.toList(), destRanges.toList()))
+            continue
+        }
         if (line.isEmpty() || i == input.size - 1) {
             // mapping done
             mappings.add(Mapping(name, sourceRanges.toList(), destRanges.toList()))
@@ -79,7 +88,6 @@ fun parseInput(input: List<String>): Pair<List<Long>, List<Mapping>> {
         destRanges.add(Range(dest, length))
     }
 
-
     return Pair(seeds, mappings)
 }
 
@@ -90,6 +98,14 @@ data class Mapping(val name: String, val sourceRanges: List<Range>, val destinat
         val destinationRange = destinationRanges[sourceRanges.indexOf(sourceRange)]
 
         val offset = destinationRange.start - sourceRange.start
+        return value + offset
+    }
+
+    fun mapValueReversed(value: Long): Long {
+        val destinationRange = destinationRanges.firstOrNull { it.isValueInRange(value) } ?: return value
+        val sourceRange = sourceRanges[destinationRanges.indexOf(destinationRange)]
+
+        val offset = sourceRange.start - destinationRange.start
         return value + offset
     }
 }
