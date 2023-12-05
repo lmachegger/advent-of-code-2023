@@ -14,7 +14,11 @@ fun main() {
 
     /**
      * This is a shitty brute force, that took ~5min to finish xD
-     * I'm sure there is a better way to solve this, but I'm too lazy to think about it
+     * It would be better to:
+     * 1. find the lowest location
+     * 2. map your way backwards
+     * 3. check if the result is a valid seed
+     * 4. if not, use the next lowest location
      */
     fun part2(input: List<String>): Long {
         val (seeds, mappings) = parseInput(input)
