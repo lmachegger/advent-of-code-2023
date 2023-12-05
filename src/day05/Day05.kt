@@ -8,14 +8,12 @@ fun main() {
     fun part1(input: List<String>): Long {
         val (seeds, mappings) = parseInput(input)
 
-        return seeds.minOf { seed ->
-            mappings.fold(seed) { acc, mapping -> mapping.mapValue(acc) }
-        }
+        return seeds.minOf { seed -> mappings.fold(seed) { acc, mapping -> mapping.mapValue(acc) } }
     }
 
     /**
      * Reverse the mapping from part 1:
-     * 1. find the lowest location (doesn't really matter, i just start at 0 and go up)
+     * 1. find the lowest location (doesn't really matter, just start at 0 and go up)
      * 2. map your way backwards
      * 3. check if the result is a valid seed
      * 4. if not, use the next lowest location
@@ -50,7 +48,7 @@ fun main() {
     val input = readInput("day05/Day05")
 
     part1(input).println()
-    part2(input).println() // 125742456
+    part2(input).println()
 }
 
 fun parseInput(input: List<String>): Pair<List<Long>, List<Mapping>> {
@@ -58,41 +56,25 @@ fun parseInput(input: List<String>): Pair<List<Long>, List<Mapping>> {
     val mappings = mutableListOf<Mapping>()
     val sourceRanges = mutableListOf<Range>()
     val destRanges = mutableListOf<Range>()
-    var name = ""
     for (i in 2 until input.size) {
         val line = input[i]
 
-        if (i == input.size - 1) {
-            // end
+        if (line.isNotEmpty() && line[0].isDigit()) {
             val (dest, source, length) = line.split(" ").map { it.toLong() }
             sourceRanges.add(Range(source, length))
             destRanges.add(Range(dest, length))
-            mappings.add(Mapping(name, sourceRanges.toList(), destRanges.toList()))
-            continue
         }
         if (line.isEmpty() || i == input.size - 1) {
-            // mapping done
-            mappings.add(Mapping(name, sourceRanges.toList(), destRanges.toList()))
+            mappings.add(Mapping(sourceRanges.toList(), destRanges.toList()))
             sourceRanges.clear()
             destRanges.clear()
-            continue
         }
-        if (!line[0].isDigit()) {
-            // mapping name
-            name = line.substringBefore(":")
-            continue
-        }
-        // mapping range
-        val (dest, source, length) = line.split(" ").map { it.toLong() }
-        sourceRanges.add(Range(source, length))
-        destRanges.add(Range(dest, length))
     }
 
     return Pair(seeds, mappings)
 }
 
-// source to dest
-data class Mapping(val name: String, val sourceRanges: List<Range>, val destinationRanges: List<Range>) {
+data class Mapping(val sourceRanges: List<Range>, val destinationRanges: List<Range>) {
     fun mapValue(value: Long): Long {
         val sourceRange = sourceRanges.firstOrNull { it.isValueInRange(value) } ?: return value
         val destinationRange = destinationRanges[sourceRanges.indexOf(sourceRange)]
@@ -101,6 +83,7 @@ data class Mapping(val name: String, val sourceRanges: List<Range>, val destinat
         return value + offset
     }
 
+    // Part 2
     fun mapValueReversed(value: Long): Long {
         val destinationRange = destinationRanges.firstOrNull { it.isValueInRange(value) } ?: return value
         val sourceRange = sourceRanges[destinationRanges.indexOf(destinationRange)]
